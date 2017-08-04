@@ -176,6 +176,7 @@
      * The Promise.all() method returns a single Promise that resolves when all of the promises in the
      * iterable argument have resolved or when the iterable argument contains no promises. It rejects
      * with the reason of the first promise that rejects.
+     * TODO: with [].reduce
      *
      * @param {Array} array
      * @return {Promise}
