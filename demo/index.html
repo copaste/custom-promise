@@ -1,4 +1,3 @@
-
 <html>
 <head>
     <title>Custom Promise implementation</title>
@@ -9,22 +8,23 @@ pre {
 }
 </style>
 <body>
+<h4>Test 1</h4>
 <pre id="promise1"></pre>
-
+<h4>Test 2</h4>
 <pre id="promise2"></pre>
-
+<h4>Test 3</h4>
 <pre id="promise3"></pre>
-
+<h4>Test 4</h4>
 <pre id="promise4"></pre>
-
+<h4>Test 5</h4>
 <pre id="promise5"></pre>
-
+<h4>Test 6</h4>
 <pre id="promise6"></pre>
-
+<h4>Test 7</h4>
 <pre id="promise7"></pre>
-
+<h4>Test 8</h4>
 <pre id="promise8"></pre>
-
+<h4>Test 9</h4>
 <pre id="promise9"></pre>
 
 <script src="promise.js"></script>
@@ -53,7 +53,7 @@ pre {
     var p1 = new Promise(function(resolve, reject) {
 
         setTimeout(function() {
-            log('rejected after 3s with value of 10 ...', 0);
+            log('setTimeout: reject after 3s with value of 10 ...', 0);
             reject(10);
         },3000);
     });
@@ -64,17 +64,17 @@ pre {
         log('reject with ' + err, 0); // reject with 10
         return err + 10;
     })
-        .then(function(value) {
-            log(value + ' - This synchronous usage is virtually pointless', 0); // 20 - This synchronous usage is virtually pointless
-            return value + 10;
-        })
-        .then(function(value) {
-            log(value + ' - This synchronous usage is virtually pointless', 0); // 30 - This synchronous usage is virtually pointless
-            return value + 10;
-        })
-        .then(function(value) {
-            log(value + ' - This synchronous usage is virtually pointless', 0); // 40 - This synchronous usage is virtually pointless
-        });
+    .then(function(value) {
+        log(value + ' - This synchronous usage is virtually pointless', 0); // 20 - This synchronous usage is virtually pointless
+        return value + 10;
+    })
+    .then(function(value) {
+        log(value + ' - This synchronous usage is virtually pointless', 0); // 30 - This synchronous usage is virtually pointless
+        return value + 10;
+    })
+    .then(function(value) {
+        log(value + ' - This synchronous usage is virtually pointless', 0); // 40 - This synchronous usage is virtually pointless
+    });
 
     // Test 2
     function resolveLater(resolve, reject) {
@@ -86,7 +86,7 @@ pre {
 
     function rejectLater(resolve, reject) {
         setTimeout(function () {
-            log('rejected after 2s with value of 200 ...', 1);
+            log('setTimeout: reject after 2s with value of 200 ...', 1);
             reject(200);
         }, 2000);
     }
@@ -113,6 +113,7 @@ pre {
             log('Makes .then() return a rejected promise, throw an error ...', 2);
             throw 'Oh no!';
         })
+        // catch method should be accessed with bracket notation in IE, otherwise it will throw an error
         ['catch'](function(reason) {
         log('Error catched with reason: ' + reason, 2); // Error catch with reason: Oh no!
     })
@@ -185,11 +186,11 @@ pre {
         ['catch'](function(e) {
         log('Error catched, error: ' + e, 5); // "oh, no!"
     })
-        .then(function(){
-            log('after a catch the chain is restored', 5);
-        }, function () {
-            warn('Not fired due to the catch', 5);
-        });
+    .then(function(){
+        log('after a catch the chain is restored', 5);
+    }, function () {
+        warn('Not fired due to the catch', 5);
+    });
 
     // Test 7
     // Errors thrown after resolve is called will be silenced
@@ -200,11 +201,11 @@ pre {
     });
 
     p13
-        .then(function(value){
-            log('Resolved with ' + value, 6);
-            return value;
-        })
-        ['catch'](function(e) {
+    .then(function(value){
+        log('Resolved with ' + value, 6);
+        return value;
+    })
+    ['catch'](function(e) {
         warn('This is never called: Error ' + e, 6); // This is never called
     });
 

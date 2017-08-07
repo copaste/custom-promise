@@ -163,6 +163,7 @@
 
     /**
      * The catch() method returns a Promise and deals with rejected cases only.
+     * The catch method should be created with bracket notion, otherwise in IE it will throw an error
      * @memberOf Promise
      *
      * @param {Function} onRejected
