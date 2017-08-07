@@ -163,6 +163,7 @@
 
     /**
      * The catch() method returns a Promise and deals with rejected cases only.
+     *  - In IE method should be wrapped in quotes!
      * @memberOf Promise
      *
      * @param {Function} onRejected

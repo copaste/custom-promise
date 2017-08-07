@@ -1,0 +1,254 @@
+
+<html>
+<head>
+    <title>Custom Promise implementation</title>
+</head>
+<style>
+pre {
+    border-bottom: 1px solid #eeeeee;
+}
+</style>
+<body>
+<pre id="promise1"></pre>
+
+<pre id="promise2"></pre>
+
+<pre id="promise3"></pre>
+
+<pre id="promise4"></pre>
+
+<pre id="promise5"></pre>
+
+<pre id="promise6"></pre>
+
+<pre id="promise7"></pre>
+
+<pre id="promise8"></pre>
+
+<pre id="promise9"></pre>
+
+<script src="promise.js"></script>
+<script>
+    var codes = [
+        document.getElementById('promise1'),
+        document.getElementById('promise2'),
+        document.getElementById('promise3'),
+        document.getElementById('promise4'),
+        document.getElementById('promise5'),
+        document.getElementById('promise6'),
+        document.getElementById('promise7'),
+        document.getElementById('promise8'),
+        document.getElementById('promise9')
+    ];
+
+    function log (msg, id) {
+        codes[id].innerHTML += msg + '<br>';
+    }
+
+    function warn (msg, id) {
+        codes[id].innerHTML += '<span style="color: red">' + msg + '</span><br>';
+    }
+
+    // Test 1
+    var p1 = new Promise(function(resolve, reject) {
+
+        setTimeout(function() {
+            log('rejected after 3s with value of 10 ...', 0);
+            reject(10);
+        },3000);
+    });
+
+    p1.then(function(value) {
+        log(value); // This is never called
+    }, function(err) {
+        log('reject with ' + err, 0); // reject with 10
+        return err + 10;
+    })
+        .then(function(value) {
+            log(value + ' - This synchronous usage is virtually pointless', 0); // 20 - This synchronous usage is virtually pointless
+            return value + 10;
+        })
+        .then(function(value) {
+            log(value + ' - This synchronous usage is virtually pointless', 0); // 30 - This synchronous usage is virtually pointless
+            return value + 10;
+        })
+        .then(function(value) {
+            log(value + ' - This synchronous usage is virtually pointless', 0); // 40 - This synchronous usage is virtually pointless
+        });
+
+    // Test 2
+    function resolveLater(resolve, reject) {
+        setTimeout(function () {
+            log('resolved after 1s with value of 100 ...', 1);
+            resolve(100);
+        }, 1000);
+    }
+
+    function rejectLater(resolve, reject) {
+        setTimeout(function () {
+            log('rejected after 2s with value of 200 ...', 1);
+            reject(200);
+        }, 2000);
+    }
+
+    var p2 = Promise.resolve('bar');
+    var p3 = p2.then(function(value) {
+        return new Promise(resolveLater); // return a new promise from the then of p2 (which will resolve after 1s)
+    });
+
+    p3.then(function(value) {
+        log('resolved with ' + value, 1); // resolved with 100
+        return new Promise(rejectLater); // return a new promise again (which will reject after 2s)
+    })
+        .then(function(value) {
+                warn('NEVER!' + value, 1); // This is never called
+            },
+            function(value) {
+                log('rejected with ' + value, 1); // rejected with 200
+            });
+
+    // Test 3
+    Promise.resolve()
+        .then(function() {
+            log('Makes .then() return a rejected promise, throw an error ...', 2);
+            throw 'Oh no!';
+        })
+        ['catch'](function(reason) {
+        log('Error catched with reason: ' + reason, 2); // Error catch with reason: Oh no!
+    })
+        .then(function() {
+            log("I am always called even if the prior then's promise rejects", 2);
+        });
+
+    // Test 4
+    Promise.resolve('foo')
+    // 1. Receive "foo" concatenate "bar" to it and resolve that to the next then
+        .then(function(string) {
+            return new Promise(function(resolve, reject) {
+                setTimeout(function() {
+                    string += 'bar';
+                    resolve(string);
+                }, 1500);
+            });
+        })
+        // 2. receive "foobar", register a callback function to work on that string
+        // and print it to the console, but not before return the unworked on
+        // string to the next then
+        .then(function(string) {
+            setTimeout(function() {
+                string += 'baz';
+                log(string, 3);
+            }, 1);
+            return string;
+        })
+        // 3. print helpful messages about how the code in this section will be run
+        // before string is actually processed by the mocked asynchronous code in the
+        // prior then block.
+        .then(function(string) {
+            log("Last Then:  oops... didn't bother to instantiate and return " +
+                "a promise in the prior then so the sequence may be a bit " +
+                "surprising", 3);
+
+            // Note that `string` will not have the 'baz' bit of it at this point. This
+            // is because we mocked that to happen asynchronously with a setTimeout function
+            log(string, 3);
+        });
+
+    var p10 = new Promise(function(resolve, reject) {
+        resolve('Success');
+    });
+
+    // Test 5
+    p10.then(function(value) {
+        log('Resolved with ' + value, 4); // "Success!"
+        log('Throw an error ...', 4);
+        throw 'oh, no!';
+    })
+        ['catch'](function(e) {
+        log('Error catched, error: ' + e, 4); // "oh, no!"
+    })
+        .then(function(){
+            log('after a catch the chain is restored', 4);
+        }, function () {
+            warn('Not fired due to the catch', 4);
+        });
+
+    // Test 6
+    // The following behaves the same as above
+    p10.then(function(value) {
+        log('Resolved with ' + value, 5); // "Success!"
+        log('Return new reject promise ....', 5);
+        return Promise.reject("oh, no!");
+    }, function(){
+        warn('Not fired', 5);
+    })
+        ['catch'](function(e) {
+        log('Error catched, error: ' + e, 5); // "oh, no!"
+    })
+        .then(function(){
+            log('after a catch the chain is restored', 5);
+        }, function () {
+            warn('Not fired due to the catch', 5);
+        });
+
+    // Test 7
+    // Errors thrown after resolve is called will be silenced
+    var p13 = new Promise(function(resolve, reject) {
+        resolve('Success');
+        log('Throw an error (Silenced Exception) ...', 6);
+        throw 'Silenced Exception!';
+    });
+
+    p13
+        .then(function(value){
+            log('Resolved with ' + value, 6);
+            return value;
+        })
+        ['catch'](function(e) {
+        warn('This is never called: Error ' + e, 6); // This is never called
+    });
+
+    // Test 8
+    var p18 = new Promise(function(resolve, reject) {
+        setTimeout(function() { resolve('three'); }, 100);
+        //setTimeout(resolve, 100, 'three');
+    });
+    var p19 = new Promise(function(resolve, reject) {
+        setTimeout(function() { reject('four'); }, 500);
+        //setTimeout(reject, 500, 'four');
+    });
+
+    Promise.race([p18, p19]).then(function(value) {
+        log('Promise.race with ' + value, 7); // "three"
+        // p3 is faster, so it resolves
+    }, function(reason) {
+        // Not called
+    });
+
+    // Test 9
+    var p20 = new Promise(function(resolve, reject) {
+        setTimeout(function() { resolve('one'); }, 1000);
+        //  setTimeout(resolve, 1000, 'one');
+    });
+    var p21 = new Promise(function(resolve, reject) {
+        setTimeout(function() { resolve('two'); }, 2000);
+        //  setTimeout(resolve, 2000, 'two');
+    });
+    var p22 = new Promise(function(resolve, reject) {
+        setTimeout(function() { resolve('three'); }, 3000);
+        //  setTimeout(resolve, 3000, 'three');
+    });
+    var p23 = new Promise(function(resolve, reject) {
+        setTimeout(function() { resolve('four'); }, 4000);
+        //  setTimeout(resolve, 4000, 'four');
+    });
+
+    Promise.all([p20, p21, p22, p23, 999])
+        .then(function(values) {
+            log('Promise.all[' + values + ']', 8);
+        }, function(reason) {
+            log(reason, 8);
+        });
+</script>
+</body>
+</html>

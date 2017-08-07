@@ -1,6 +1,7 @@
 # Custom Promise implementation
 
-There'are still some browsers which doesn't support Promises, here is a custom implementation on it.
+There're still some browsers which doesn't support Promises, this is a custom implementation on it.
+Tested on IE8!
 
 ## Examples:
 
