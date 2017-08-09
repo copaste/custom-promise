@@ -1,5 +1,5 @@
 (function (window) {
-    window.Promise = typeof window.Promise === 'function' ? window.Promise : Promise;
+    window.Promise = Promise; // rewrite build in promise custom, just for the tests
 
     /**
      * Promise callback init
